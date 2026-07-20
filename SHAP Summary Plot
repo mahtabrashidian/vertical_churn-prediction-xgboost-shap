@@ -1,0 +1,46 @@
+import xgboost as xgb
+import shap
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
+# 1. ایجاد داده‌های نمونه (مشابه ویژگی‌های مخابراتی پروژه شما)
+np.random.seed(42)
+n_samples = 100
+data = {
+    'RSSI': np.random.uniform(-105, -70, n_samples),
+    'Distance': np.random.uniform(10, 500, n_samples),
+    'Speed': np.random.uniform(0, 120, n_samples),
+    'Channels_Free': np.random.randint(0, 50, n_samples),
+    'Channels_Required': np.random.randint(1, 48, n_samples)
+}
+X = pd.DataFrame(data)
+# ایجاد هدف (target) بر اساس RSSI و نیاز کانالی
+y = (X['RSSI'] < -90) | (X['Channels_Required'] > 30)
+y = y.astype(int)
+
+# 2. آموزش مدل
+model = xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss')
+model.fit(X, y)
+
+# 3. تولید نمودار SHAP
+explainer = shap.TreeExplainer(model)
+shap_values = explainer(X)
+
+# ذخیره نمودار
+plt.figure(figsize=(10, 6))
+shap.summary_plot(shap_values, X, show=False)
+plt.title("SHAP Summary Plot - Vertical Churn Prediction")
+plt.tight_layout()
+plt.savefig('/mnt/data/shap_summary_plot.png')
+print("نمودار ذخیره شد.")
+Output: ---------------------------------------------------------------------------
+ModuleNotFoundError                       Traceback (most recent call last)
+Cell In[1], line 2
+      1 import xgboost as xgb
+----> 2 import shap
+      3 import pandas as pd
+      4 import numpy as np
+
+ModuleNotFoundError: No module named 'shap'
